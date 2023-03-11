@@ -26,13 +26,16 @@ public class VendorController {
 
 	@GetMapping("")
 	public List<Vendor> getAll() {
+		
 		List<Vendor> vendor = vendorRepo.findAll();
 
 		return vendor;
 	}
+	
 
 	@GetMapping("/{id}")
 	public Vendor getById(@PathVariable int id) {
+		
 		Vendor vendor = new Vendor();
 		Optional<Vendor> optionalVendor = vendorRepo.findById(id);
 
@@ -41,8 +44,8 @@ public class VendorController {
 		}
 
 		return vendor;
-
 	}
+	
 
 	@PostMapping("")
 	public Vendor createVendor(@RequestBody Vendor newVendor) {

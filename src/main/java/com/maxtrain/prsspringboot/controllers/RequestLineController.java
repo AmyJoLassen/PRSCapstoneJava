@@ -17,10 +17,14 @@ import com.maxtrain.prsspringboot.entities.Request;
 import com.maxtrain.prsspringboot.entities.RequestLine;
 import com.maxtrain.prsspringboot.entities.Vendor;
 import com.maxtrain.prsspringboot.repositories.RequestLineRepository;
+import com.maxtrain.prsspringboot.repositories.RequestRepository;
 
 @RestController
 @RequestMapping("/request-lines")
 public class RequestLineController {
+	
+	@Autowired
+	private RequestRepository requestRepo;
 
 	@Autowired
 	private RequestLineRepository requestLineRepo;
@@ -48,10 +52,11 @@ public class RequestLineController {
 	public RequestLine create(@RequestBody RequestLine newRequestLine) {
 		RequestLine requestLine = new RequestLine();
 
-		boolean userExists = requestLineRepo.findById(newRequestLine.getId()).isPresent();
+		boolean requestLineExists = requestLineRepo.findById(newRequestLine.getId()).isPresent();
 
-		if (!userExists) {
+		if (!requestLineExists) {
 			requestLine = requestLineRepo.save(newRequestLine);
+			recalculateTotal(requestLine.getRequest());
 		}
 
 		return requestLine;
@@ -59,12 +64,17 @@ public class RequestLineController {
 
 	@PutMapping("")
 	public RequestLine update(@RequestBody RequestLine updatedRequestLine) {
+		
 		RequestLine requestLine = new RequestLine();
-
-		boolean requestLineExists = requestLineRepo.findById(updatedRequestLine.getId()).isPresent();
+		Optional<RequestLine> optionalRequestLine = requestLineRepo.findById(updatedRequestLine.getId());
+		
+		boolean requestLineExists = optionalRequestLine.isPresent();
 
 		if (requestLineExists) {
-			requestLine = requestLineRepo.save(updatedRequestLine);
+			requestLine = optionalRequestLine.get();
+				Request request = requestLine.getRequest();
+				requestLine = requestLineRepo.save(updatedRequestLine);
+				recalculateTotal(request);
 		}
 
 		return requestLine;
@@ -73,43 +83,35 @@ public class RequestLineController {
 
 	@DeleteMapping("{id}")
 	public RequestLine delete(@PathVariable int id) {
+		
 		RequestLine requestLine = new RequestLine();
 		Optional<RequestLine> optionalRequestLine = requestLineRepo.findById(id);
 
-		boolean requestExists = optionalRequestLine.isPresent();
+		boolean requestLineExists = optionalRequestLine.isPresent();
 
-		if (requestExists) {
+		if (requestLineExists) {
 			requestLine = optionalRequestLine.get();
+			Request request = requestLine.getRequest();
 			requestLineRepo.deleteById(id);
+			recalculateTotal(request);
 		}
 
 		return requestLine;
 	}
 	
-	public RequestLine update() {
-		RequestLine line = new RequestLine();
-		
-		//male the update call to the RequestLineRepository
-		
-		recalculateTotal(line.getRequest());
-		
-		return line;
-	}
-
 	
-	
-	private recalculateTotal(int requestId) {
-		RequestLine line = new RequestLine();
-		// get a list of RequesLines for the request that we are recalculating
-		// This requires a new repository method
-		List<RequestLine> requestLines = requestLineRepo.//something ();
-				
-		// Loop through the list of RequestLines (enhanced for each loop)
-		// For each RequestLine, calculate the total of the line (qty * item), keep running total
-		// Set recalculated total to the request that we are recalculating
-		//Save the request to the Requests table in our database
-				
-		// Hint Use RequestRepo inside the requestController @Autowired in the RequestRepository ??
+	private void recalculateTotal(Request request) {
+		
+		List<RequestLine> requestLines = requestLineRepo.findByRequest(request);
+		
+		double total = 0;
+		
+		for (RequestLine requestLine : requestLines) {
+			total = total + (requestLine.getProduct().getPrice() * requestLine.getQuantity());
+		}
+		request.setTotal(total);
+		
+		requestRepo.save(request);
 		
 	}
 	

@@ -33,6 +33,7 @@ public class RequestController {
 
 	@GetMapping("")
 	public List<Request> getAll() {
+		
 		List<Request> request = requestRepo.findAll();
 
 		return request;
@@ -40,6 +41,7 @@ public class RequestController {
 
 	@GetMapping("/{id}")
 	public Request getById(@PathVariable int id) {
+		
 		Request request = new Request();
 		Optional<Request> optionalRequest = requestRepo.findById(id);
 
@@ -69,9 +71,11 @@ public class RequestController {
 
 	@PutMapping("")
 	public Request updated(@RequestBody Request updatedRequest) {
+		
 		Request request = new Request();
 
 		boolean userExists = requestRepo.findById(updatedRequest.getId()).isPresent();
+		
 		if (userExists) {
 			request = requestRepo.save(updatedRequest);
 		}
@@ -79,8 +83,9 @@ public class RequestController {
 
 	}
 
-	@DeleteMapping("{id}")
+	@DeleteMapping("/{id}")
 	public Request delete(@PathVariable int id) {
+		
 		Request request = new Request();
 		Optional<Request> optionalRequest = requestRepo.findById(id);
 
@@ -97,6 +102,7 @@ public class RequestController {
 
 	@GetMapping("/list-review/{userId}")
 	public List<Request> getAllForReveiw(@PathVariable int userId) {
+		
 		List<Request> requests = requestRepo.findByStatusAndUserIdNot(REVIEW, userId);
 
 		return requests;
@@ -104,8 +110,8 @@ public class RequestController {
 
 	@PutMapping("/approve")
 	public Request approve(@RequestBody Request approvedRequest) {
+		
 		Request request = new Request();
-
 		boolean requestExists = requestRepo.existsById(approvedRequest.getId());
 
 		if (requestExists) {
@@ -149,6 +155,25 @@ public class RequestController {
 		return request;
 	}
 	
-	
+	@PutMapping("/review")
+	public Request submitForReview(@RequestBody Request requestForReview) {
+		
+		Request request = new Request();
+
+		boolean requestExists = requestRepo.existsById(requestForReview.getId());
+
+		if (requestExists && request.getTotal() <= 50) {
+			requestForReview.setStatus(APPROVED);
+			requestForReview.setSubmittedDate(LocalDateTime.now());
+			request = requestRepo.save(requestForReview);
+			
+		} else if (requestExists && request.getTotal() > 50) {
+			requestForReview.setStatus(REVIEW);
+			requestForReview.setSubmittedDate(LocalDateTime.now());
+			request = requestRepo.save(requestForReview);
+		}
+		
+			return request;
+	}
 	
 }

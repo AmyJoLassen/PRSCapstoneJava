@@ -25,13 +25,16 @@ public class UserController {
 
 	@GetMapping("")
 	public List<User> getAll() {
+		
 		List<User> users = userRepo.findAll();
 
 		return users;
 	}
+	
 
 	@GetMapping("/{id}")
 	public User getById(@PathVariable int id) {
+		
 		User user = new User();
 		Optional<User> optionalUser = userRepo.findById(id);
 
@@ -42,9 +45,11 @@ public class UserController {
 		return user;
 
 	}
+	
 
 	@PostMapping("")
 	public User create(@RequestBody User newUser) {
+		
 		User user = new User();
 
 		boolean userExists = userRepo.findById(newUser.getId()).isPresent();
@@ -52,13 +57,15 @@ public class UserController {
 		if (!userExists) {
 			user = userRepo.save(newUser);
 		}
+		
 		return user;
 
-		// return userRepo.save(newUser);
 	}
 
+	
 	@PutMapping("")
 	public User update(@RequestBody User updatedUser) {
+		
 		User user = new User();
 
 		boolean userExists = userRepo.findById(updatedUser.getId()).isPresent();
@@ -71,13 +78,14 @@ public class UserController {
 	}
 
 	@DeleteMapping("{id}")
-	public User delete(@PathVariable int id) {
+	public User delete(@PathVariable("id") int id) {
+		
 		User user = new User();
+		
 		Optional<User> optionalUser = userRepo.findById(id);
 		
-		boolean userExists = optionalUser.isPresent();
-		
-		if(userExists) {
+		if(optionalUser.isPresent());
+		{
 			user = optionalUser.get();
 			userRepo.deleteById(id); 
 		}
@@ -86,8 +94,10 @@ public class UserController {
 		
 	}
 	
+	
 	@PostMapping("/login")
 	public User authenticate(@RequestBody User loginUser) {
+		
 		User user = new User();
 		user = userRepo.findByUsernameAndPassword(loginUser.getUsername(), loginUser.getPassword());
 		
