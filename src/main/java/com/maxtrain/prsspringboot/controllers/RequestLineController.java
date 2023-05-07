@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import com.maxtrain.prsspringboot.entities.Vendor;
 import com.maxtrain.prsspringboot.repositories.RequestLineRepository;
 import com.maxtrain.prsspringboot.repositories.RequestRepository;
 
+@CrossOrigin(origins="http://localhost:4200")
 @RestController
 @RequestMapping("/request-lines")
 public class RequestLineController {
@@ -35,55 +37,51 @@ public class RequestLineController {
 
 		return requestLine;
 	}
+	
 
 	@GetMapping("/{id}")
 	public RequestLine getById(@PathVariable int id) {
 		RequestLine requestLine = new RequestLine();
+		
 		Optional<RequestLine> optionalRequestLine = requestLineRepo.findById(id);
-
 		if (optionalRequestLine.isPresent()) {
 			requestLine = optionalRequestLine.get();
 		}
-
 		return requestLine;
 	}
+	
 
 	@PostMapping("")
 	public RequestLine create(@RequestBody RequestLine newRequestLine) {
 		RequestLine requestLine = new RequestLine();
 
 		boolean requestLineExists = requestLineRepo.findById(newRequestLine.getId()).isPresent();
-
 		if (!requestLineExists) {
 			requestLine = requestLineRepo.save(newRequestLine);
 			recalculateTotal(requestLine.getRequest());
 		}
-
 		return requestLine;
 	}
+	
 
 	@PutMapping("")
 	public RequestLine update(@RequestBody RequestLine updatedRequestLine) {
-		
 		RequestLine requestLine = new RequestLine();
 		Optional<RequestLine> optionalRequestLine = requestLineRepo.findById(updatedRequestLine.getId());
 		
 		boolean requestLineExists = optionalRequestLine.isPresent();
-
 		if (requestLineExists) {
 			requestLine = optionalRequestLine.get();
 				Request request = requestLine.getRequest();
 				requestLine = requestLineRepo.save(updatedRequestLine);
 				recalculateTotal(request);
 		}
-
 		return requestLine;
-
 	}
+	
 
 	@DeleteMapping("{id}")
 	public RequestLine delete(@PathVariable int id) {
-		
 		RequestLine requestLine = new RequestLine();
 		Optional<RequestLine> optionalRequestLine = requestLineRepo.findById(id);
 
@@ -95,24 +93,19 @@ public class RequestLineController {
 			requestLineRepo.deleteById(id);
 			recalculateTotal(request);
 		}
-
 		return requestLine;
 	}
 	
 	
 	private void recalculateTotal(Request request) {
-		
 		List<RequestLine> requestLines = requestLineRepo.findByRequest(request);
 		
 		double total = 0;
-		
 		for (RequestLine requestLine : requestLines) {
 			total = total + (requestLine.getProduct().getPrice() * requestLine.getQuantity());
 		}
 		request.setTotal(total);
 		
 		requestRepo.save(request);
-		
 	}
-	
 }

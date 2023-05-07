@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.maxtrain.prsspringboot.entities.User;
 import com.maxtrain.prsspringboot.repositories.UserRepository;
 
+@CrossOrigin(origins="http://localhost:4200")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -37,13 +39,10 @@ public class UserController {
 		
 		User user = new User();
 		Optional<User> optionalUser = userRepo.findById(id);
-
 		if (optionalUser.isPresent()) {
 			user = optionalUser.get();
 		}
-
 		return user;
-
 	}
 	
 
@@ -51,15 +50,11 @@ public class UserController {
 	public User create(@RequestBody User newUser) {
 		
 		User user = new User();
-
 		boolean userExists = userRepo.findById(newUser.getId()).isPresent();
-
 		if (!userExists) {
 			user = userRepo.save(newUser);
 		}
-		
 		return user;
-
 	}
 
 	
@@ -67,13 +62,10 @@ public class UserController {
 	public User update(@RequestBody User updatedUser) {
 		
 		User user = new User();
-
 		boolean userExists = userRepo.findById(updatedUser.getId()).isPresent();
-
 		if (userExists) {
 			user = userRepo.save(updatedUser);
 		}
-
 		return user;
 	}
 
@@ -81,17 +73,13 @@ public class UserController {
 	public User delete(@PathVariable("id") int id) {
 		
 		User user = new User();
-		
 		Optional<User> optionalUser = userRepo.findById(id);
-		
 		if(optionalUser.isPresent());
 		{
 			user = optionalUser.get();
 			userRepo.deleteById(id); 
 		}
-		
 		return user;
-		
 	}
 	
 	
@@ -104,5 +92,4 @@ public class UserController {
 		return user;
 		
 	}
-
 }
